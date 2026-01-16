@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: n8n # Đã xóa creationTimestamp: null
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n-deployment
+  namespace: n8n
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      containers:
+      - name: n8n
+        image: n8nio/n8n
+        ports:
+        - containerPort: 5678
+        
+        # --- BỔ SUNG RESOURCES (QUAN TRỌNG CHO CKA) ---
+        resources:
+          requests:
+            memory: "256Mi" # Mức ram tối thiểu đảm bảo cho app chạy
+            cpu: "250m"     # 0.25 core CPU
+          limits:
+            memory: "1Gi"   # Mức ram tối đa, quá mức này pod sẽ bị restart (OOMKilled)
+            cpu: "1000m"    # Tối đa 1 core CPU
+        # ----------------------------------------------
+
+        env:
+        - name: N8N_BASIC_AUTH_ACTIVE
+          value: "true"
+        - name: N8N_BASIC_AUTH_USER
+          value: "n8n"
+        - name: N8N_BASIC_AUTH_PASSWORD
+          value: "n8n"
+        - name: GENERIC_TIMEZONE
+          value: "Asia/Ho_Chi_Minh"
+        - name: TZ
+          value: "Asia/Ho_Chi_Minh"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-deployment
+  namespace: n8n
+spec:
+  type: NodePort
+  selector:
+    app: n8n
+  ports:
+  - protocol: TCP
+    port: 5678
+    nodePort: 32567
