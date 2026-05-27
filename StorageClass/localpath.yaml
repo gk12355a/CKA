@@ -1,0 +1,10 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-path
+  annotations:
+    # Đây là dòng quan trọng để set class này làm mặc định (Default)
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: rancher.io/local-path
+# Lưu ý chính tả: WaitForFirstConsumer (không phải WaitFro...)
+volumeBindingMode: WaitForFirstConsumer
